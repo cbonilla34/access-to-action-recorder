@@ -3,188 +3,868 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ACCESS to Action - Microphone Test</title>
+
+  <title>ACCESS to Action - Recorder Test</title>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f7fb;
       margin: 0;
       padding: 24px;
-      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+
+      font-family: Arial, Helvetica, sans-serif;
       color: #1f2937;
+      background: #f3f6fa;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 560px;
+      margin-top: 30px;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      color: #17365d;
+      font-size: 32px;
+      line-height: 1.1;
+    }
+
+    .brand p {
+      margin: 8px 0 0;
+      color: #64748b;
+      font-size: 16px;
     }
 
     .card {
-      max-width: 520px;
-      margin: 40px auto;
-      background: white;
+      background: #ffffff;
+      border-radius: 24px;
       padding: 28px;
-      border-radius: 22px;
-      box-shadow: 0 6px 24px rgba(0,0,0,.10);
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.10);
     }
 
-    h1 {
+    .step-label {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #e8eef7;
       color: #17365d;
-      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 26px;
+    }
+
+    .instructions {
+      margin: 0 0 24px;
+      color: #64748b;
+      line-height: 1.5;
+      font-size: 16px;
+    }
+
+    .recording-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      min-height: 170px;
+      margin-bottom: 20px;
+      padding: 24px;
+
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 20px;
+
+      text-align: center;
+    }
+
+    .mic-circle {
+      width: 72px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 50%;
+      background: #e8eef7;
+
+      font-size: 34px;
+      margin-bottom: 12px;
+    }
+
+    .recording-display.recording {
+      background: #fff5f5;
+      border-color: #efb2ad;
+    }
+
+    .recording-display.recording .mic-circle {
+      background: #b42318;
+      color: #ffffff;
+      animation: pulse 1.2s infinite;
+    }
+
+    .recording-display.complete {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+
+    .recording-display.complete .mic-circle {
+      background: #dcfce7;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(180, 35, 24, 0.35);
+      }
+
+      70% {
+        box-shadow: 0 0 0 16px rgba(180, 35, 24, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(180, 35, 24, 0);
+      }
     }
 
     .status {
-      padding: 14px;
-      margin: 22px 0;
-      border-radius: 12px;
-      background: #eef3f8;
-      font-weight: bold;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
     }
 
-    button {
-      display: block;
+    .timer {
+      min-height: 38px;
+      font-size: 32px;
+      font-weight: 800;
+      color: #17365d;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .primary-button,
+    .secondary-button,
+    .use-button {
       width: 100%;
-      padding: 18px;
-      margin: 12px 0;
-      border: 0;
-      border-radius: 14px;
+      min-height: 62px;
+
+      border: none;
+      border-radius: 16px;
+
+      padding: 16px 20px;
+      margin: 0 0 12px;
+
       font-size: 18px;
-      font-weight: bold;
+      font-weight: 800;
+
       cursor: pointer;
     }
 
-    #recordBtn {
+    .primary-button {
+      background: #17365d;
+      color: #ffffff;
+    }
+
+    .primary-button.recording {
       background: #b42318;
-      color: white;
+      color: #ffffff;
     }
 
-    #stopBtn {
-      background: #374151;
-      color: white;
+    .secondary-button {
+      background: #eef2f7;
+      color: #27364a;
+      border: 2px solid #d9e1ea;
     }
 
-    #stopBtn:disabled {
-      opacity: .4;
+    .use-button {
+      background: #166534;
+      color: #ffffff;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
     }
 
     audio {
       width: 100%;
-      margin-top: 20px;
+      margin: 6px 0 18px;
     }
 
-    .success {
-      background: #dcfce7;
-      color: #166534;
+    .review-area {
+      display: none;
+      margin-top: 6px;
     }
 
-    .error {
+    .review-area.show {
+      display: block;
+    }
+
+    .review-title {
+      margin: 0 0 10px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .message {
+      display: none;
+
+      padding: 14px 16px;
+      margin-top: 16px;
+
+      border-radius: 14px;
+
+      font-size: 15px;
+      line-height: 1.4;
+      font-weight: 700;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.error {
       background: #fee2e2;
       color: #991b1b;
     }
 
-    .small {
-      font-size: 14px;
-      color: #6b7280;
-      margin-top: 20px;
+    .message.success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .privacy {
+      margin: 18px 4px 0;
+      text-align: center;
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 14px;
+      }
+
+      .app {
+        margin-top: 10px;
+      }
+
+      .card {
+        padding: 22px;
+        border-radius: 20px;
+      }
+
+      .brand h1 {
+        font-size: 28px;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="card">
-    <h1>ACCESS to Action</h1>
-    <h2>Microphone Test</h2>
 
-    <p>This test checks whether this device can record audio.</p>
+  <main class="app">
 
-    <div id="status" class="status">
-      Ready to test.
-    </div>
+    <header class="brand">
+      <h1>ACCESS to Action</h1>
+      <p>Recording Test</p>
+    </header>
 
-    <button id="recordBtn">🎤 Start Recording</button>
-    <button id="stopBtn" disabled>■ Stop Recording</button>
+    <section class="card">
 
-    <audio id="playback" controls hidden></audio>
+      <div class="step-label">
+        PHASE 2A TEST
+      </div>
 
-    <p class="small">
-      This test does not upload or permanently save your recording.
-    </p>
-  </div>
+      <h2>Record your voice</h2>
+
+      <p class="instructions">
+        Press Start Recording and speak normally.
+        When you are finished, press the same button to stop.
+      </p>
+
+      <div
+        id="recordingDisplay"
+        class="recording-display"
+        aria-live="polite"
+      >
+
+        <div
+          id="micCircle"
+          class="mic-circle"
+        >
+          🎤
+        </div>
+
+        <div
+          id="status"
+          class="status"
+        >
+          Ready to record
+        </div>
+
+        <div
+          id="timer"
+          class="timer"
+        >
+          0:00
+        </div>
+
+      </div>
+
+      <button
+        id="recordButton"
+        class="primary-button"
+        type="button"
+      >
+        🎤 Start Recording
+      </button>
+
+      <div
+        id="reviewArea"
+        class="review-area"
+      >
+
+        <p class="review-title">
+          Listen to your recording
+        </p>
+
+        <audio
+          id="audioPlayback"
+          controls
+        ></audio>
+
+        <button
+          id="recordAgainButton"
+          class="secondary-button"
+          type="button"
+        >
+          ↻ Record Again
+        </button>
+
+        <button
+          id="useRecordingButton"
+          class="use-button"
+          type="button"
+        >
+          ✓ Use Recording
+        </button>
+
+      </div>
+
+      <div
+        id="message"
+        class="message"
+        role="status"
+        aria-live="polite"
+      ></div>
+
+      <p class="privacy">
+        Test mode: this recording stays temporarily in this browser.
+        It is not uploaded or permanently saved.
+      </p>
+
+    </section>
+
+  </main>
+
 
   <script>
-    let mediaRecorder;
+
+    let mediaRecorder = null;
+    let mediaStream = null;
+
     let audioChunks = [];
-    let stream;
+    let recordingBlob = null;
+    let recordingUrl = null;
 
-    const recordBtn = document.getElementById("recordBtn");
-    const stopBtn = document.getElementById("stopBtn");
-    const playback = document.getElementById("playback");
-    const statusBox = document.getElementById("status");
+    let timerInterval = null;
+    let recordingStartedAt = null;
 
-    recordBtn.addEventListener("click", async () => {
+    const recordingDisplay =
+      document.getElementById("recordingDisplay");
+
+    const statusText =
+      document.getElementById("status");
+
+    const timerText =
+      document.getElementById("timer");
+
+    const recordButton =
+      document.getElementById("recordButton");
+
+    const reviewArea =
+      document.getElementById("reviewArea");
+
+    const audioPlayback =
+      document.getElementById("audioPlayback");
+
+    const recordAgainButton =
+      document.getElementById("recordAgainButton");
+
+    const useRecordingButton =
+      document.getElementById("useRecordingButton");
+
+    const messageBox =
+      document.getElementById("message");
+
+
+    function formatTime(totalSeconds) {
+
+      const minutes =
+        Math.floor(totalSeconds / 60);
+
+      const seconds =
+        totalSeconds % 60;
+
+      return (
+        minutes +
+        ":" +
+        String(seconds).padStart(2, "0")
+      );
+    }
+
+
+    function startTimer() {
+
+      recordingStartedAt = Date.now();
+
+      timerText.textContent = "0:00";
+
+      timerInterval = setInterval(() => {
+
+        const elapsedSeconds =
+          Math.floor(
+            (Date.now() - recordingStartedAt) / 1000
+          );
+
+        timerText.textContent =
+          formatTime(elapsedSeconds);
+
+      }, 250);
+    }
+
+
+    function stopTimer() {
+
+      if (timerInterval) {
+
+        clearInterval(timerInterval);
+
+        timerInterval = null;
+      }
+    }
+
+
+    function showMessage(text, type) {
+
+      messageBox.textContent = text;
+
+      messageBox.className =
+        "message show " + type;
+    }
+
+
+    function clearMessage() {
+
+      messageBox.textContent = "";
+
+      messageBox.className = "message";
+    }
+
+
+    function clearOldRecording() {
+
+      if (recordingUrl) {
+
+        URL.revokeObjectURL(recordingUrl);
+
+        recordingUrl = null;
+      }
+
+      recordingBlob = null;
+
+      audioPlayback.removeAttribute("src");
+
+      audioPlayback.load();
+
+      reviewArea.classList.remove("show");
+    }
+
+
+    function stopMediaTracks() {
+
+      if (mediaStream) {
+
+        mediaStream
+          .getTracks()
+          .forEach(track => track.stop());
+
+        mediaStream = null;
+      }
+    }
+
+
+    function setReadyState() {
+
+      stopTimer();
+
+      recordingDisplay.className =
+        "recording-display";
+
+      statusText.textContent =
+        "Ready to record";
+
+      timerText.textContent =
+        "0:00";
+
+      recordButton.textContent =
+        "🎤 Start Recording";
+
+      recordButton.className =
+        "primary-button";
+
+      recordButton.disabled = false;
+    }
+
+
+    function setRecordingState() {
+
+      recordingDisplay.className =
+        "recording-display recording";
+
+      statusText.textContent =
+        "Recording…";
+
+      recordButton.textContent =
+        "■ Stop Recording";
+
+      recordButton.className =
+        "primary-button recording";
+
+      recordButton.disabled = false;
+
+      reviewArea.classList.remove("show");
+
+      startTimer();
+    }
+
+
+    function setCompleteState() {
+
+      recordingDisplay.className =
+        "recording-display complete";
+
+      statusText.textContent =
+        "Recording complete";
+
+      recordButton.textContent =
+        "🎤 Start New Recording";
+
+      recordButton.className =
+        "primary-button";
+
+      recordButton.disabled = false;
+
+      reviewArea.classList.add("show");
+    }
+
+
+    async function startRecording() {
+
+      clearMessage();
+
+      clearOldRecording();
+
       try {
-        statusBox.className = "status";
-        statusBox.textContent = "Requesting microphone access...";
 
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        if (
+          !navigator.mediaDevices ||
+          !navigator.mediaDevices.getUserMedia
+        ) {
 
-        audioChunks = [];
-        mediaRecorder = new MediaRecorder(stream);
+          throw new Error(
+            "Microphone recording is not supported in this browser."
+          );
+        }
 
-        mediaRecorder.addEventListener("dataavailable", event => {
-          if (event.data.size > 0) {
-            audioChunks.push(event.data);
-          }
-        });
-
-        mediaRecorder.addEventListener("stop", () => {
-          const audioBlob = new Blob(audioChunks, {
-            type: mediaRecorder.mimeType
+        mediaStream =
+          await navigator.mediaDevices.getUserMedia({
+            audio: true
           });
 
-          const audioURL = URL.createObjectURL(audioBlob);
+        audioChunks = [];
 
-          playback.src = audioURL;
-          playback.hidden = false;
+        let options = {};
 
-          statusBox.className = "status success";
-          statusBox.textContent =
-            "Recording complete. Press Play below and make sure you can hear yourself.";
+        if (
+          window.MediaRecorder &&
+          MediaRecorder.isTypeSupported(
+            "audio/webm;codecs=opus"
+          )
+        ) {
 
-          if (stream) {
-            stream.getTracks().forEach(track => track.stop());
+          options.mimeType =
+            "audio/webm;codecs=opus";
+        }
+
+        mediaRecorder =
+          new MediaRecorder(
+            mediaStream,
+            options
+          );
+
+
+        mediaRecorder.addEventListener(
+          "dataavailable",
+          event => {
+
+            if (
+              event.data &&
+              event.data.size > 0
+            ) {
+
+              audioChunks.push(
+                event.data
+              );
+            }
           }
-        });
+        );
+
+
+        mediaRecorder.addEventListener(
+          "stop",
+          () => {
+
+            stopTimer();
+
+            const mimeType =
+              mediaRecorder.mimeType ||
+              "audio/webm";
+
+            recordingBlob =
+              new Blob(
+                audioChunks,
+                {
+                  type: mimeType
+                }
+              );
+
+            recordingUrl =
+              URL.createObjectURL(
+                recordingBlob
+              );
+
+            audioPlayback.src =
+              recordingUrl;
+
+            audioPlayback.load();
+
+            stopMediaTracks();
+
+            setCompleteState();
+          }
+        );
+
+
+        mediaRecorder.addEventListener(
+          "error",
+          event => {
+
+            stopTimer();
+
+            stopMediaTracks();
+
+            setReadyState();
+
+            showMessage(
+              "Something interrupted the recording. Please try again.",
+              "error"
+            );
+
+            console.error(
+              "MediaRecorder error:",
+              event
+            );
+          }
+        );
+
 
         mediaRecorder.start();
 
-        recordBtn.disabled = true;
-        stopBtn.disabled = false;
-
-        statusBox.className = "status success";
-        statusBox.textContent = "Recording now... say something for about 10 seconds.";
+        setRecordingState();
 
       } catch (error) {
+
+        stopTimer();
+
+        stopMediaTracks();
+
+        setReadyState();
+
         console.error(error);
 
-        statusBox.className = "status error";
 
-        if (error.name === "NotAllowedError") {
-          statusBox.textContent =
-            "Microphone access was blocked or denied.";
-        } else if (error.name === "NotFoundError") {
-          statusBox.textContent =
-            "No microphone was found on this device.";
+        if (
+          error.name === "NotAllowedError" ||
+          error.name === "SecurityError"
+        ) {
+
+          showMessage(
+            "Microphone access was blocked or denied. Please allow microphone access for this site and try again.",
+            "error"
+          );
+
+        } else if (
+          error.name === "NotFoundError"
+        ) {
+
+          showMessage(
+            "No microphone was found on this device.",
+            "error"
+          );
+
         } else {
-          statusBox.textContent =
-            "Microphone test failed: " + error.name;
+
+          showMessage(
+            "The microphone could not start. Please try again.",
+            "error"
+          );
         }
       }
-    });
+    }
 
-    stopBtn.addEventListener("click", () => {
-      if (mediaRecorder && mediaRecorder.state === "recording") {
+
+    function stopRecording() {
+
+      if (
+        mediaRecorder &&
+        mediaRecorder.state === "recording"
+      ) {
+
+        recordButton.disabled = true;
+
+        recordButton.textContent =
+          "Finishing…";
+
+        statusText.textContent =
+          "Finishing recording…";
+
         mediaRecorder.stop();
       }
+    }
 
-      recordBtn.disabled = false;
-      stopBtn.disabled = true;
-    });
+
+    recordButton.addEventListener(
+      "click",
+      async () => {
+
+        if (
+          mediaRecorder &&
+          mediaRecorder.state === "recording"
+        ) {
+
+          stopRecording();
+
+        } else {
+
+          await startRecording();
+        }
+      }
+    );
+
+
+    recordAgainButton.addEventListener(
+      "click",
+      async () => {
+
+        clearMessage();
+
+        clearOldRecording();
+
+        setReadyState();
+
+        await startRecording();
+      }
+    );
+
+
+    useRecordingButton.addEventListener(
+      "click",
+      () => {
+
+        if (
+          !recordingBlob ||
+          recordingBlob.size === 0
+        ) {
+
+          showMessage(
+            "There is no recording to use yet.",
+            "error"
+          );
+
+          return;
+        }
+
+        audioPlayback.pause();
+
+        showMessage(
+          "✓ Recording accepted. Phase 2A test successful.",
+          "success"
+        );
+
+        statusText.textContent =
+          "Recording accepted";
+
+        useRecordingButton.disabled =
+          true;
+
+        recordAgainButton.disabled =
+          true;
+
+        recordButton.disabled =
+          true;
+      }
+    );
+
+
+    window.addEventListener(
+      "beforeunload",
+      () => {
+
+        stopTimer();
+
+        stopMediaTracks();
+
+        if (recordingUrl) {
+
+          URL.revokeObjectURL(
+            recordingUrl
+          );
+        }
+      }
+    );
+
+
+    setReadyState();
+
   </script>
+
 </body>
 </html>
